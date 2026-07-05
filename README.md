@@ -282,7 +282,7 @@ CorAssist is designed as a **software-first, sensor-agnostic** platform. While c
 ##  Hackathon Submission
 - **Event**: HackIndia Spark-11 Hyderabad, Telangana South Central Region
 - **Theme**: 🧠 DeepTech Innovation
-- **Dev Post / Project ID**: CorAssist
+- **Project Lead**: B.Bhuvana Sarada
 
 ---
 
