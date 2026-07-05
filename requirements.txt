@@ -1,0 +1,14 @@
+torch
+scipy
+numpy
+scikit-learn
+pyqt5
+pyqtgraph
+wfdb
+pandas
+matplotlib
+requests
+firebase-admin
+pyttsx3
+fpdf
+websockets

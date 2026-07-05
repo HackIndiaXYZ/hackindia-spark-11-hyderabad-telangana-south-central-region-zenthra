@@ -1,0 +1,8 @@
+{
+    "sketch": "c:/Users/bbsar/OneDrive/Desktop/Cardiac/arduino/v2_firmware/v2_firmware.ino",
+    "board": "arduino:avr:uno",
+    "output": "c:/Users/bbsar/OneDrive/Desktop/Cardiac/build",
+    "port": "COM3",
+    "arduino.logLevel": "info",
+    "arduino.languageServer.enabled": true
+}
