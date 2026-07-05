@@ -129,7 +129,7 @@ CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways.
 
 ---
 
-## 🏗️ Product Viability & T-Hub Shortlist Specs
+## 🏗️ Product Viability 
 
 | Metric | Specification |
 | :--- | :--- |
