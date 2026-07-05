@@ -119,7 +119,6 @@ CorAssist/
 | **Power Supply** | **3.7V Lithium-Polymer (LiPo) Battery:** Lightweight, rechargeable power source to mimic a consumer wearable form factor. |
 ---
 
-<<<<<<< HEAD
 ## ⚖️ Regulatory & Clinical Compliance
 
 CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways. 
