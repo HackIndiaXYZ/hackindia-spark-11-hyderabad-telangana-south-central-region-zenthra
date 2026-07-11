@@ -1,11 +1,14 @@
 import React, { createContext, useContext, useState } from 'react';
+import { setHapticAssuranceEnabled } from '../../utils/hapticsEngine';
 
 const AccessibilityContext = createContext({
   fontSize: 18,
   highContrast: false,
+  hapticAssurance: true,
   increaseFont: () => {},
   decreaseFont: () => {},
   toggleHighContrast: () => {},
+  toggleHapticAssurance: () => {},
   themeStyles: {},
   getResponsiveStyle: () => {},
 });
@@ -13,6 +16,7 @@ const AccessibilityContext = createContext({
 export function SeniorAccessibilityProvider({ children }) {
   const [fontSize, setFontSize] = useState(18); // default 18, range 16 - 36
   const [themeMode, setThemeMode] = useState('light'); // default to 'light' (Senior Light Theme)
+  const [hapticAssurance, setHapticAssurance] = useState(true);
 
   const increaseFont = () => {
     setFontSize(prev => Math.min(36, prev + 2));
@@ -27,6 +31,14 @@ export function SeniorAccessibilityProvider({ children }) {
       if (prev === 'light') return 'hcDark';
       if (prev === 'hcDark') return 'standard';
       return 'light';
+    });
+  };
+
+  const toggleHapticAssurance = () => {
+    setHapticAssurance(prev => {
+      const next = !prev;
+      setHapticAssuranceEnabled(next);
+      return next;
     });
   };
 
@@ -67,9 +79,11 @@ export function SeniorAccessibilityProvider({ children }) {
   const value = {
     fontSize,
     highContrast,
+    hapticAssurance,
     increaseFont,
     decreaseFont,
     toggleHighContrast,
+    toggleHapticAssurance,
     themeStyles,
     getResponsiveStyle,
   };

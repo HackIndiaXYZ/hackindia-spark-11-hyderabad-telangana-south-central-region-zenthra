@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, ScrollView } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, SafeAreaView, Platform, ScrollView, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { SeniorAccessibilityProvider, useAccessibility } from './SeniorAccessibilityProvider';
 import VoiceIntentEngine from './VoiceIntentEngine';
@@ -9,7 +9,15 @@ import CaregiverRelayHub from './CaregiverRelayHub';
 import SeniorOSDemoSuite from './SeniorOSDemoSuite';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
-import * as Haptics from 'expo-haptics';
+import * as Speech from 'expo-speech';
+import { 
+  confirmAction, 
+  successAction, 
+  startEmergencyHaptics, 
+  stopEmergencyHaptics, 
+  tabSwitch, 
+  withTremorFilter 
+} from '../../utils/hapticsEngine';
 
 // CONTEXT IMPORT FALLBACK: safely wrap useCardiacData import with fallback dummy state
 let useCardiacData;
@@ -34,14 +42,16 @@ function SeniorOSContent({ onClose }) {
   const { 
     fontSize, 
     highContrast, 
+    hapticAssurance,
     increaseFont, 
     decreaseFont, 
     toggleHighContrast, 
+    toggleHapticAssurance,
     themeStyles, 
     getResponsiveStyle 
   } = useAccessibility();
 
-  const { liveState, triggerEmergency, medHistory } = useCardiacData();
+  const { liveState, triggerEmergency } = useCardiacData();
 
   // Tab Selection: 'health' | 'voice' | 'schemes' | 'caregiver'
   const [activeTab, setActiveTab] = useState('health');
@@ -55,6 +65,17 @@ function SeniorOSContent({ onClose }) {
   // Simulated countdown for emergency override
   const [countdown, setCountdown] = useState(10);
   const [rescueDispatched, setRescueDispatched] = useState(false);
+
+  // Animated scale values for Pulse Ripple effect
+  const sosTopScale = useRef(new Animated.Value(1)).current;
+  const sosManualScale = useRef(new Animated.Value(1)).current;
+
+  const triggerPulseAnimation = (scaleVar) => {
+    Animated.sequence([
+      Animated.timing(scaleVar, { toValue: 0.88, duration: 70, useNativeDriver: true }),
+      Animated.spring(scaleVar, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true })
+    ]).start();
+  };
 
   // Monitor the global cardiac emergency state
   useEffect(() => {
@@ -110,6 +131,7 @@ function SeniorOSContent({ onClose }) {
 
     if (result.intent_category === 'EMERGENCY_OVERRIDE') {
       triggerEmergency(true);
+      startEmergencyHaptics();
       if (result.caregiver_notification) {
         const newAlert = {
           id: Date.now(),
@@ -194,27 +216,75 @@ function SeniorOSContent({ onClose }) {
         </View>
 
         <View style={styles.controls}>
-          <TouchableOpacity style={[styles.controlBtn, { borderColor: themeStyles.border }]} onPress={decreaseFont}>
+          <TouchableOpacity 
+            style={[styles.controlBtn, { borderColor: themeStyles.border }]} 
+            onPress={withTremorFilter(() => {
+              decreaseFont();
+              confirmAction();
+              Speech.speak("Font size decreased", { rate: 1.1 });
+            })}
+          >
             <Text style={{ fontSize: 14, color: themeStyles.text, fontWeight: 'bold' }}>A-</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.controlBtn, { borderColor: themeStyles.border }]} onPress={increaseFont}>
+
+          <TouchableOpacity 
+            style={[styles.controlBtn, { borderColor: themeStyles.border }]} 
+            onPress={withTremorFilter(() => {
+              increaseFont();
+              confirmAction();
+              Speech.speak("Font size increased", { rate: 1.1 });
+            })}
+          >
             <Text style={{ fontSize: 18, color: themeStyles.text, fontWeight: 'bold' }}>A+</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.controlBtnContrast, { borderColor: themeStyles.border, backgroundColor: themeStyles.primary }]} onPress={toggleHighContrast}>
+
+          <TouchableOpacity 
+            style={[styles.controlBtnContrast, { borderColor: themeStyles.border, backgroundColor: themeStyles.primary }]} 
+            onPress={withTremorFilter(() => {
+              toggleHighContrast();
+              confirmAction();
+            })}
+          >
             <MaterialIcons name="contrast" size={16} color={themeStyles.mode === 'light' ? "#FFF" : "#000"} />
             <Text style={{ fontSize: 11, color: themeStyles.mode === 'light' ? "#FFF" : "#000", fontWeight: 'bold', marginLeft: 4 }}>THEME</Text>
           </TouchableOpacity>
+
+          {/* Haptic Assurance Switch */}
+          <TouchableOpacity 
+            style={[
+              styles.controlBtnContrast, 
+              { 
+                borderColor: themeStyles.border, 
+                backgroundColor: hapticAssurance ? themeStyles.accent : themeStyles.border 
+              }
+            ]} 
+            onPress={withTremorFilter(() => {
+              toggleHapticAssurance();
+              if (!hapticAssurance) {
+                successAction();
+              }
+            })}
+          >
+            <MaterialIcons name={hapticAssurance ? "notifications-active" : "notifications-off"} size={16} color={hapticAssurance ? "#FFF" : themeStyles.text} />
+            <Text style={{ fontSize: 11, color: hapticAssurance ? "#FFF" : themeStyles.text, fontWeight: 'bold', marginLeft: 4 }}>
+              {hapticAssurance ? "HAPTIC ON" : "HAPTIC OFF"}
+            </Text>
+          </TouchableOpacity>
           
           {/* URGENT SOS ACTION BUTTON */}
-          <TouchableOpacity 
-            style={styles.sosTopBtn} 
-            onPress={() => {
-              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); } catch (e) {}
-              triggerEmergency(true);
-            }}
-          >
-            <Text style={{ fontSize: 13, color: '#FFF', fontWeight: '900' }}>🆘 SOS</Text>
-          </TouchableOpacity>
+          <Animated.View style={{ transform: [{ scale: sosTopScale }] }}>
+            <TouchableOpacity 
+              style={[styles.sosTopBtn, { borderWidth: 2, borderColor: '#FFF' }]} 
+              onPress={withTremorFilter(() => {
+                triggerPulseAnimation(sosTopScale);
+                confirmAction();
+                startEmergencyHaptics();
+                triggerEmergency(true);
+              })}
+            >
+              <Text style={{ fontSize: 13, color: '#FFF', fontWeight: '950' }}>🆘 SOS</Text>
+            </TouchableOpacity>
+          </Animated.View>
 
           {onClose && (
             <TouchableOpacity style={[styles.controlBtn, { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }]} onPress={onClose}>
@@ -285,15 +355,22 @@ function SeniorOSContent({ onClose }) {
                 If your heart stability drops below safe margins, the system triggers a 10-second fail-safe countdown. You can cancel it if you are okay, otherwise an autonomous medical ambulance is dispatched.
               </Text>
               
-              <TouchableOpacity 
-                style={[styles.sosManualBtn, { backgroundColor: '#ef4444' }]} 
-                onPress={() => triggerEmergency(true)}
-              >
-                <MaterialIcons name="warning" size={24} color="#FFF" />
-                <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: '#FFF', marginLeft: 8 }]}>
-                  TRIGGER SOS MANUAL ALARM
-                </Text>
-              </TouchableOpacity>
+              <Animated.View style={{ transform: [{ scale: sosManualScale }] }}>
+                <TouchableOpacity 
+                  style={[styles.sosManualBtn, { backgroundColor: '#ef4444' }]} 
+                  onPress={withTremorFilter(() => {
+                    triggerPulseAnimation(sosManualScale);
+                    confirmAction();
+                    startEmergencyHaptics();
+                    triggerEmergency(true);
+                  })}
+                >
+                  <MaterialIcons name="warning" size={24} color="#FFF" />
+                  <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: '#FFF', marginLeft: 8 }]}>
+                    TRIGGER SOS MANUAL ALARM
+                  </Text>
+                </TouchableOpacity>
+              </Animated.View>
             </View>
           </ScrollView>
         )}
@@ -327,7 +404,10 @@ function SeniorOSContent({ onClose }) {
                 
                 <TouchableOpacity 
                   style={styles.dossierBtn} 
-                  onPress={handleGenerateERDossier}
+                  onPress={withTremorFilter(() => {
+                    confirmAction();
+                    handleGenerateERDossier();
+                  })}
                 >
                   <MaterialIcons name="picture-as-pdf" size={22} color="#000" />
                   <Text style={styles.dossierBtnText}>GENERATE ER DOSSIER PDF</Text>
@@ -335,7 +415,11 @@ function SeniorOSContent({ onClose }) {
 
                 <TouchableOpacity 
                   style={styles.cancelBtn} 
-                  onPress={() => triggerEmergency(false)}
+                  onPress={withTremorFilter(() => {
+                    successAction();
+                    stopEmergencyHaptics();
+                    triggerEmergency(false);
+                  })}
                 >
                   <Text style={styles.cancelBtnText}>DISMISS ALARM / RECOVERY</Text>
                 </TouchableOpacity>
@@ -347,14 +431,21 @@ function SeniorOSContent({ onClose }) {
                 
                 <TouchableOpacity 
                   style={styles.confirmDispatchBtn} 
-                  onPress={() => setRescueDispatched(true)}
+                  onPress={withTremorFilter(() => {
+                    confirmAction();
+                    setRescueDispatched(true);
+                  })}
                 >
                   <Text style={styles.confirmDispatchText}>DISPATCH RESCUE IMMEDIATELY</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity 
                   style={styles.dismissBigBtn} 
-                  onPress={() => triggerEmergency(false)}
+                  onPress={withTremorFilter(() => {
+                    successAction();
+                    stopEmergencyHaptics();
+                    triggerEmergency(false);
+                  })}
                 >
                   <Text style={styles.dismissBigText}>I AM OKAY - CANCEL DISPATCH</Text>
                 </TouchableOpacity>
@@ -371,7 +462,10 @@ function SeniorOSContent({ onClose }) {
             styles.navTab, 
             activeTab === 'health' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
           ]} 
-          onPress={() => setActiveTab('health')}
+          onPress={withTremorFilter(() => {
+            tabSwitch();
+            setActiveTab('health');
+          })}
         >
           <MaterialIcons name="favorite" size={24} color={activeTab === 'health' ? themeStyles.primary : themeStyles.textMuted} />
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'health' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
@@ -384,7 +478,10 @@ function SeniorOSContent({ onClose }) {
             styles.navTab, 
             activeTab === 'voice' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
           ]} 
-          onPress={() => setActiveTab('voice')}
+          onPress={withTremorFilter(() => {
+            tabSwitch();
+            setActiveTab('voice');
+          })}
         >
           <MaterialIcons name="keyboard-voice" size={24} color={activeTab === 'voice' ? themeStyles.primary : themeStyles.textMuted} />
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'voice' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
@@ -397,7 +494,10 @@ function SeniorOSContent({ onClose }) {
             styles.navTab, 
             activeTab === 'schemes' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
           ]} 
-          onPress={() => setActiveTab('schemes')}
+          onPress={withTremorFilter(() => {
+            tabSwitch();
+            setActiveTab('schemes');
+          })}
         >
           <MaterialIcons name="verified-user" size={24} color={activeTab === 'schemes' ? themeStyles.primary : themeStyles.textMuted} />
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'schemes' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
@@ -410,7 +510,10 @@ function SeniorOSContent({ onClose }) {
             styles.navTab, 
             activeTab === 'caregiver' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
           ]} 
-          onPress={() => setActiveTab('caregiver')}
+          onPress={withTremorFilter(() => {
+            tabSwitch();
+            setActiveTab('caregiver');
+          })}
         >
           <View style={{ position: 'relative' }}>
             <MaterialIcons name="family-restroom" size={24} color={activeTab === 'caregiver' ? themeStyles.primary : themeStyles.textMuted} />

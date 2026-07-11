@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput } from 
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAccessibility } from './SeniorAccessibilityProvider';
 import * as Speech from 'expo-speech';
+import { confirmAction, successAction, withTremorFilter } from '../../utils/hapticsEngine';
 
 const SCHEMES = [
   {
@@ -35,7 +36,7 @@ const SCHEMES = [
 ];
 
 export default function SeniorServicesHub() {
-  const { themeStyles, getResponsiveStyle, fontSize } = useAccessibility();
+  const { themeStyles, getResponsiveStyle } = useAccessibility();
 
   // 1. Eligibility States
   const [age, setAge] = useState('68');
@@ -140,7 +141,10 @@ export default function SeniorServicesHub() {
                       borderWidth: 2,
                     }
                   ]}
-                  onPress={() => setIncome(inc)}
+                  onPress={withTremorFilter(() => {
+                    confirmAction();
+                    setIncome(inc);
+                  })}
                 >
                   <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: income === inc ? '#FFF' : themeStyles.text }]}>
                     {inc.toUpperCase()}
@@ -164,7 +168,10 @@ export default function SeniorServicesHub() {
                       borderWidth: 2,
                     }
                   ]}
-                  onPress={() => setHealthStatus(hlth)}
+                  onPress={withTremorFilter(() => {
+                    confirmAction();
+                    setHealthStatus(hlth);
+                  })}
                 >
                   <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: healthStatus === hlth ? '#FFF' : themeStyles.text }]}>
                     {hlth.toUpperCase()}
@@ -237,10 +244,11 @@ export default function SeniorServicesHub() {
               <TouchableOpacity
                 key={s.id}
                 style={[styles.wizardRow, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-                onPress={() => {
+                onPress={withTremorFilter(() => {
+                  confirmAction();
                   setSelectedSpecialty(s.name);
                   setWizardStep(2);
-                }}
+                })}
               >
                 <View>
                   <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text }]}>
@@ -265,10 +273,11 @@ export default function SeniorServicesHub() {
               <TouchableOpacity
                 key={idx}
                 style={[styles.wizardRow, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-                onPress={() => {
+                onPress={withTremorFilter(() => {
+                  confirmAction();
                   setSelectedTime(time);
                   setWizardStep(3);
-                }}
+                })}
               >
                 <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text }]}>
                   {time}
@@ -278,7 +287,10 @@ export default function SeniorServicesHub() {
             ))}
             <TouchableOpacity 
               style={[styles.backBtn, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-              onPress={() => setWizardStep(1)}
+              onPress={withTremorFilter(() => {
+                confirmAction();
+                setWizardStep(1);
+              })}
             >
               <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, fontWeight: '900' }]}>
                 ◀ GO BACK
@@ -318,7 +330,10 @@ export default function SeniorServicesHub() {
             ) : (
               <TouchableOpacity
                 style={[styles.voiceReminderBtn, { backgroundColor: themeStyles.primary }]}
-                onPress={handleSpeechReminder}
+                onPress={withTremorFilter(() => {
+                  successAction();
+                  handleSpeechReminder();
+                })}
               >
                 <MaterialIcons name="keyboard-voice" size={24} color={themeStyles.mode === 'light' ? '#FFF' : '#000'} />
                 <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.mode === 'light' ? '#FFF' : '#000', marginLeft: 8 }]}>
@@ -329,7 +344,10 @@ export default function SeniorServicesHub() {
 
             <TouchableOpacity
               style={[styles.resetBtn, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-              onPress={resetWizard}
+              onPress={withTremorFilter(() => {
+                confirmAction();
+                resetWizard();
+              })}
             >
               <Text style={[getResponsiveStyle(13), { color: themeStyles.text, fontWeight: '900' }]}>
                 BOOK ANOTHER APPOINTMENT

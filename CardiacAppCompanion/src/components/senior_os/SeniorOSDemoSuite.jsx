@@ -1,12 +1,23 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAccessibility } from './SeniorAccessibilityProvider';
 import { parseVoiceIntent } from './VoiceIntentEngine';
 import * as Speech from 'expo-speech';
+import { confirmAction, successAction, withTremorFilter } from '../../utils/hapticsEngine';
 
 export default function SeniorOSDemoSuite({ onDemoTriggered }) {
   const { themeStyles, getResponsiveStyle } = useAccessibility();
+
+  // Pulse scale animation for Demo/Haptic buttons
+  const testScale = useRef(new Animated.Value(1)).current;
+
+  const triggerTestAnimation = () => {
+    Animated.sequence([
+      Animated.timing(testScale, { toValue: 0.85, duration: 60, useNativeDriver: true }),
+      Animated.spring(testScale, { toValue: 1, friction: 3, tension: 40, useNativeDriver: true })
+    ]).start();
+  };
 
   const runDemoScenario = (scenarioNum) => {
     let transcript = "";
@@ -28,6 +39,15 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
     onDemoTriggered(result);
   };
 
+  const handleTestHaptics = () => {
+    triggerTestAnimation();
+    // Bi-modal feedback loop: vibration + ripple + sound chime
+    confirmAction();
+    setTimeout(() => {
+      successAction();
+    }, 150);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
       <View style={styles.header}>
@@ -40,24 +60,50 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
       <View style={styles.buttonRow}>
         <TouchableOpacity 
           style={[styles.demoBtn, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-          onPress={() => runDemoScenario(1)}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            runDemoScenario(1);
+          })}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.text }]}>DEMO 1</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={[styles.demoBtn, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-          onPress={() => runDemoScenario(2)}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            runDemoScenario(2);
+          })}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.text }]}>DEMO 2</Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
           style={[styles.demoBtn, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-          onPress={() => runDemoScenario(3)}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            runDemoScenario(3);
+          })}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.danger }]}>DEMO 3</Text>
         </TouchableOpacity>
+
+        {/* Demo Haptics test button */}
+        <Animated.View style={{ transform: [{ scale: testScale }] }}>
+          <TouchableOpacity 
+            style={[
+              styles.demoBtn, 
+              { 
+                backgroundColor: themeStyles.primary, 
+                borderColor: themeStyles.border, 
+                borderWidth: 2 
+              }
+            ]}
+            onPress={withTremorFilter(handleTestHaptics)}
+          >
+            <Text style={[getResponsiveStyle(11), { fontWeight: '950', color: '#FFF' }]}>TEST HAPTICS 🔔</Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   );

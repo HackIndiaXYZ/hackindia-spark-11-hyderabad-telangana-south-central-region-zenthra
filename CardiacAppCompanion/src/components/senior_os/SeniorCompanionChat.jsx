@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Platform, Linking } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAccessibility } from './SeniorAccessibilityProvider';
+import { confirmAction, successAction, withTremorFilter } from '../../utils/hapticsEngine';
 
 const MOCK_PHARMACIES = [
   { name: 'Apollo Pharmacy Secunderabad', baseDist: 320, latOffset: 0.002, lngOffset: -0.001, address: 'Metro Station Pillar 20, Secunderabad' },
@@ -162,7 +163,10 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
 
                 <TouchableOpacity 
                   style={[styles.navigateBtn, { backgroundColor: themeStyles.primary }]}
-                  onPress={() => handleNavigate(p)}
+                  onPress={withTremorFilter(() => {
+                    confirmAction();
+                    handleNavigate(p);
+                  })}
                 >
                   <MaterialIcons name="directions" size={24} color="#FFF" />
                   <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: '#FFF', marginLeft: 4 }]}>
@@ -179,7 +183,10 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
       <View style={styles.chipsContainer}>
         <TouchableOpacity 
           style={[styles.chip, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]} 
-          onPress={() => handleChipClick("Where are my nearby pharmacies?")}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            handleChipClick("Where are my nearby pharmacies?");
+          })}
         >
           <MaterialIcons name="local-pharmacy" size={24} color="#ef4444" style={styles.chipIcon} />
           <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>
@@ -189,7 +196,10 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
 
         <TouchableOpacity 
           style={[styles.chip, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]} 
-          onPress={() => handleChipClick("Remind me about my medicine")}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            handleChipClick("Remind me about my medicine")}
+          )}
         >
           <MaterialIcons name="alarm" size={24} color="#3b82f6" style={styles.chipIcon} />
           <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>
@@ -199,7 +209,10 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
 
         <TouchableOpacity 
           style={[styles.chip, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]} 
-          onPress={() => handleChipClick("Notify my family to call me")}
+          onPress={withTremorFilter(() => {
+            confirmAction();
+            handleChipClick("Notify my family to call me");
+          })}
         >
           <MaterialIcons name="family-restroom" size={24} color="#10b981" style={styles.chipIcon} />
           <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>

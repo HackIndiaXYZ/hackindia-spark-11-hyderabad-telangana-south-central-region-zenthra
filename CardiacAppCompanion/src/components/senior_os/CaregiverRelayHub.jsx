@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Modal, ActivityIndicator, Alert, Linking } from 'react-native';
 import { MaterialIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useAccessibility } from './SeniorAccessibilityProvider';
+import { confirmAction, successAction, withTremorFilter } from '../../utils/hapticsEngine';
 
 // CONTEXT IMPORT FALLBACK: safely wrap useCardiacData import with fallback dummy state
 let useCardiacData;
@@ -134,7 +135,10 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
                 <View style={[styles.voicePlayer, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}>
                   <TouchableOpacity 
                     style={[styles.playBtn, { backgroundColor: themeStyles.primary }]}
-                    onPress={() => handlePlayVoice(item)}
+                    onPress={withTremorFilter(() => {
+                      confirmAction();
+                      handlePlayVoice(item);
+                    })}
                   >
                     <MaterialIcons name={isPlaying ? "stop" : "play-arrow"} size={20} color={themeStyles.mode === 'light' ? '#FFF' : '#000'} />
                   </TouchableOpacity>
@@ -167,7 +171,10 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
                 <View style={styles.actionRow}>
                   <TouchableOpacity 
                     style={[styles.actionButton, { backgroundColor: themeStyles.primary, borderColor: themeStyles.border }]}
-                    onPress={() => triggerCall()}
+                    onPress={withTremorFilter(() => {
+                      confirmAction();
+                      triggerCall();
+                    })}
                   >
                     <MaterialIcons name="call" size={20} color="#FFF" />
                     <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: '#FFF', marginLeft: 6 }]}>
@@ -177,10 +184,11 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
 
                   <TouchableOpacity 
                     style={[styles.actionButton, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}
-                    onPress={() => {
+                    onPress={withTremorFilter(() => {
+                      confirmAction();
                       setSelectedAlert(item);
                       setShowVitalsModal(true);
-                    }}
+                    })}
                   >
                     <MaterialIcons name="favorite" size={20} color="#ef4444" />
                     <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginLeft: 6 }]}>
@@ -190,7 +198,10 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
 
                   <TouchableOpacity 
                     style={[styles.actionButton, { backgroundColor: 'rgba(22, 163, 74, 0.15)', borderColor: '#16a34a' }]}
-                    onPress={() => onAcknowledgeAlert(item.id)}
+                    onPress={withTremorFilter(() => {
+                      successAction();
+                      onAcknowledgeAlert(item.id);
+                    })}
                   >
                     <MaterialIcons name="check" size={20} color="#16a34a" />
                     <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: '#16a34a', marginLeft: 6 }]}>
@@ -212,7 +223,10 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
               <Text style={[getResponsiveStyle(18, true), { fontWeight: '900', color: themeStyles.text }]}>
                 Live Vitals & Location
               </Text>
-              <TouchableOpacity onPress={() => setShowVitalsModal(false)}>
+              <TouchableOpacity onPress={withTremorFilter(() => {
+                confirmAction();
+                setShowVitalsModal(false);
+              })}>
                 <MaterialIcons name="close" size={24} color={themeStyles.textMuted} />
               </TouchableOpacity>
             </View>
@@ -259,7 +273,10 @@ export default function CaregiverRelayHub({ alerts = [], onAcknowledgeAlert }) {
 
             <TouchableOpacity 
               style={[styles.closeModalBtn, { backgroundColor: themeStyles.primary }]}
-              onPress={() => setShowVitalsModal(false)}
+              onPress={withTremorFilter(() => {
+                confirmAction();
+                setShowVitalsModal(false);
+              })}
             >
               <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: '#FFF' }]}>
                 CLOSE MENU
