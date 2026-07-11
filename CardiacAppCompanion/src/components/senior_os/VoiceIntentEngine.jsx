@@ -174,47 +174,65 @@ export default function VoiceIntentEngine({ onIntentRouted, addNotification }) {
     return '#94a3b8'; // gray
   };
 
+  const isIdle = !isListening && !isProcessing && !transcript;
+
   return (
-    <View style={[styles.container, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
+    <View style={[
+      styles.container, 
+      { 
+        backgroundColor: themeStyles.cardBackground, 
+        borderColor: themeStyles.border,
+        padding: isIdle ? 10 : 16,
+        marginBottom: isIdle ? 10 : 16,
+      }
+    ]}>
       <View style={styles.header}>
         <View style={styles.micStatus}>
           <View style={[styles.indicatorDot, { backgroundColor: getStatusColor() }]} />
-          <Text style={[getResponsiveStyle(14), { color: themeStyles.textMuted }]}>
-            {isListening ? "Listening..." : isProcessing ? "Processing Voice..." : "Voice Assistant Idle"}
+          <Text style={[getResponsiveStyle(14), { color: themeStyles.textMuted, fontWeight: '700' }]}>
+            {isListening ? "Listening..." : isProcessing ? "Processing..." : "Voice Assistant"}
           </Text>
         </View>
 
         <TouchableOpacity 
-          style={[styles.micButton, { backgroundColor: isListening ? '#ef4444' : themeStyles.primary }]} 
+          style={[
+            styles.micButton, 
+            { 
+              backgroundColor: isListening ? themeStyles.danger : themeStyles.primary,
+              width: isIdle ? 48 : 56,
+              height: isIdle ? 48 : 56,
+            }
+          ]} 
           onPress={toggleListening}
         >
-          <MaterialIcons name={isListening ? "mic-off" : "mic"} size={28} color="#FFF" />
+          <MaterialIcons name={isListening ? "mic-off" : "mic"} size={isIdle ? 22 : 26} color="#FFF" />
         </TouchableOpacity>
       </View>
 
-      {/* Waveform Visualizer */}
-      <View style={styles.waveformContainer}>
-        {waveHeights.map((h, i) => (
-          <View 
-            key={i} 
-            style={[
-              styles.waveBar, 
-              { 
-                height: h, 
-                backgroundColor: isListening ? themeStyles.accent : themeStyles.textMuted,
-                opacity: isListening ? 1 : 0.4
-              }
-            ]} 
-          />
-        ))}
-      </View>
+      {/* Waveform Visualizer (Hidden when idle) */}
+      {!isIdle && (isListening || isProcessing) && (
+        <View style={styles.waveformContainer}>
+          {waveHeights.map((h, i) => (
+            <View 
+              key={i} 
+              style={[
+                styles.waveBar, 
+                { 
+                  height: h, 
+                  backgroundColor: isListening ? themeStyles.accent : themeStyles.textMuted,
+                  opacity: isListening ? 1 : 0.4
+                }
+              ]} 
+            />
+          ))}
+        </View>
+      )}
 
-      {transcript ? (
+      {!isIdle && transcript ? (
         <View style={styles.transcriptBox}>
-          <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, fontStyle: 'italic' }]}>
+          <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, fontStyle: 'italic', fontWeight: '600' }]}>
             {"\""} {transcript} {"\""}
           </Text>
-
         </View>
       ) : null}
 
@@ -227,20 +245,28 @@ export default function VoiceIntentEngine({ onIntentRouted, addNotification }) {
               backgroundColor: themeStyles.background, 
               color: themeStyles.text, 
               borderColor: themeStyles.border,
-              fontSize: 16
+              fontSize: 16,
+              height: isIdle ? 44 : 50,
             }
           ]}
-          placeholder="Or type voice command..."
+          placeholder="Type voice command..."
           placeholderTextColor={themeStyles.textMuted}
           value={manualText}
           onChangeText={setManualText}
           onSubmitEditing={handleManualSubmit}
         />
         <TouchableOpacity 
-          style={[styles.sendButton, { backgroundColor: themeStyles.primary }]}
+          style={[
+            styles.sendButton, 
+            { 
+              backgroundColor: themeStyles.primary,
+              width: isIdle ? 44 : 50,
+              height: isIdle ? 44 : 50,
+            }
+          ]}
           onPress={handleManualSubmit}
         >
-          <MaterialIcons name="send" size={20} color={themeStyles.highContrast ? "#000" : "#FFF"} />
+          <MaterialIcons name="send" size={isIdle ? 18 : 20} color={themeStyles.mode === 'light' ? '#FFF' : (themeStyles.highContrast ? "#000" : "#FFF")} />
         </TouchableOpacity>
       </View>
     </View>
@@ -249,16 +275,14 @@ export default function VoiceIntentEngine({ onIntentRouted, addNotification }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 18,
     borderRadius: 24,
     borderWidth: 2,
-    marginBottom: 20,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
   micStatus: {
     flexDirection: 'row',
@@ -271,9 +295,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   micButton: {
-    width: 60,
-    height: 60,
-    borderRadius: 30,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 4,
@@ -286,37 +308,33 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    height: 65,
-    marginVertical: 10,
+    height: 50,
+    marginVertical: 6,
   },
   waveBar: {
-    width: 8,
-    borderRadius: 4,
-    minHeight: 8,
-    transition: 'height 0.15s ease',
+    width: 6,
+    borderRadius: 3,
+    minHeight: 6,
   },
   transcriptBox: {
-    padding: 12,
-    backgroundColor: 'rgba(0,0,0,0.1)',
+    padding: 10,
+    backgroundColor: 'rgba(0,0,0,0.05)',
     borderRadius: 12,
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 10,
   },
   fallbackContainer: {
     flexDirection: 'row',
     gap: 8,
-    marginTop: 10,
+    marginTop: 6,
   },
   input: {
     flex: 1,
-    height: 50,
     borderRadius: 16,
     borderWidth: 1,
     paddingHorizontal: 16,
   },
   sendButton: {
-    width: 50,
-    height: 50,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',

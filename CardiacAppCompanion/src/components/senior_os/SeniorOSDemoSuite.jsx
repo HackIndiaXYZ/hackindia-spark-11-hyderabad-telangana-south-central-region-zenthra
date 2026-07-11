@@ -29,11 +29,11 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.accent }]}>
+    <View style={[styles.container, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
       <View style={styles.header}>
-        <MaterialIcons name="gavel" size={18} color={themeStyles.accent} />
-        <Text style={[getResponsiveStyle(12), { fontWeight: '950', color: themeStyles.accent, marginLeft: 6 }]}>
-          JUDGE LIVE DEMO CONTROLS
+        <MaterialIcons name="gavel" size={16} color={themeStyles.accent} />
+        <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.accent, marginLeft: 4 }]} numberOfLines={1}>
+          JUDGE DEMOS:
         </Text>
       </View>
 
@@ -43,9 +43,6 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
           onPress={() => runDemoScenario(1)}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.text }]}>DEMO 1</Text>
-          <Text style={[getResponsiveStyle(8), { color: themeStyles.textMuted, marginTop: 2 }]} numberOfLines={1}>
-            Direct AI Answer
-          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -53,9 +50,6 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
           onPress={() => runDemoScenario(2)}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.text }]}>DEMO 2</Text>
-          <Text style={[getResponsiveStyle(8), { color: themeStyles.textMuted, marginTop: 2 }]} numberOfLines={1}>
-            Caregiver Relay
-          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
@@ -63,9 +57,6 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
           onPress={() => runDemoScenario(3)}
         >
           <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: themeStyles.danger }]}>DEMO 3</Text>
-          <Text style={[getResponsiveStyle(8), { color: themeStyles.textMuted, marginTop: 2 }]} numberOfLines={1}>
-            Critical Emergency
-          </Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -74,27 +65,30 @@ export default function SeniorOSDemoSuite({ onDemoTriggered }) {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 12,
-    borderRadius: 20,
+    height: 40,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    borderRadius: 8,
     borderWidth: 2,
     marginHorizontal: 15,
-    marginTop: 10,
-    marginBottom: 10,
+    marginTop: 6,
+    marginBottom: 6,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 8,
   },
   buttonRow: {
     flexDirection: 'row',
     gap: 8,
+    alignItems: 'center',
   },
   demoBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    paddingHorizontal: 6,
-    borderRadius: 12,
+    paddingHorizontal: 8,
+    height: 28,
+    borderRadius: 14,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
