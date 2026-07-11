@@ -114,4 +114,4 @@ export function CardiacProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export const useCardiacData = () => useContext(CardiacDataContext);
+export const useCardiacData = () => useContext(CardiacDataContext); 
