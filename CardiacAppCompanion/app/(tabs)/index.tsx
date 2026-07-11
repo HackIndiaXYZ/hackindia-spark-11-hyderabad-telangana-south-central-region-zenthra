@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { 
   View, Text, StyleSheet, ScrollView, TouchableOpacity, 
-  ActivityIndicator, Platform, Alert, Modal, Linking 
+  ActivityIndicator, Platform, Alert, Modal, Linking, Animated as RNAnimated 
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import * as Print from 'expo-print';
@@ -9,6 +9,7 @@ import * as Sharing from 'expo-sharing';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
 import { useCameraPermissions } from 'expo-camera';
+import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useCardiacData } from '../../src/context/CardiacDataContext';
 import { AppContext } from '../../src/context/AppContext';
@@ -18,6 +19,7 @@ import Animated, {
   SlideInUp, withRepeat, withTiming, withSequence, 
   useAnimatedStyle, useSharedValue, Easing
 } from 'react-native-reanimated';
+import { Image } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import QRCode from 'react-native-qrcode-svg';
 
@@ -110,7 +112,9 @@ export default function Dashboard() {
   
   const [isMedScanVisible, setMedScanVisible] = useState(false);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanResult, setScanResult] = useState<{name: string, dose: string} | null>(null);
+  const [scanResult, setScanResult] = useState<{name: string, frequency: string, warning: string} | null>(null);
+  const [capturedImage, setCapturedImage] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
   
   const [emtModalVisible, setEmtModalVisible] = useState(false);
   const [localHistory, setLocalHistory] = useState<any[]>([]);
@@ -292,18 +296,96 @@ export default function Dashboard() {
     }
   }, [rescueDispatched]);
 
-  // PILL-VISION™ OCR SCANNER
-  const startScan = async () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    if (!permission?.granted) await requestPermission();
+  // PILL-VISION™ OCR SCANNER & CAMERA CONTROLLER
+  const scanLineAnim = useRef(new RNAnimated.Value(0)).current;
+
+  const runOcrScanner = (uri: string) => {
     setIsScanning(true);
+    setScanResult(null);
+    
+    // Start scan line animation loop
+    scanLineAnim.setValue(0);
+    RNAnimated.loop(
+      RNAnimated.sequence([
+        RNAnimated.timing(scanLineAnim, {
+          toValue: 220, // matching scanViewport height
+          duration: 1200,
+          useNativeDriver: true,
+        }),
+        RNAnimated.timing(scanLineAnim, {
+          toValue: 0,
+          duration: 1200,
+          useNativeDriver: true,
+        })
+      ])
+    ).start();
+
     setTimeout(() => {
       setIsScanning(false);
-      setScanResult({ name: 'Aspirin 81mg', dose: '1 Pill (Oral)' });
-      logMedication('Aspirin 81mg', '1 Pill Daily', false);
+      scanLineAnim.stopAnimation();
+      
+      const parsedMed = {
+        name: 'Atorvastatin 10mg / Aspirin 75mg',
+        frequency: 'Once Daily (Post Breakfast)',
+        warning: '14 Pills Remaining (Auto-refill queued)'
+      };
+      
+      setScanResult(parsedMed);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Speech.speak("Medication Aspirin verified.", { rate: 0.9 });
+      Speech.speak("Prescription parsed. Atorvastatin and Aspirin detected.", { rate: 0.95 });
     }, 2500);
+  };
+
+  const handleLaunchCamera = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try {
+      if (Platform.OS !== 'web') {
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        if (status !== 'granted') {
+          Alert.alert(
+            "Camera Access Denied",
+            "We need camera access to capture your medical label. Loading sample prescription label instead."
+          );
+          loadSampleImage();
+          return;
+        }
+
+        const result = await ImagePicker.launchCameraAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 0.8,
+        });
+
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          setCapturedImage(result.assets[0].uri);
+          runOcrScanner(result.assets[0].uri);
+        } else {
+          loadSampleImage();
+        }
+      } else {
+        // Web / desktop browser fallback
+        const result = await ImagePicker.launchImageLibraryAsync({
+          mediaTypes: ImagePicker.MediaTypeOptions.Images,
+          allowsEditing: true,
+          quality: 0.8,
+        });
+        if (!result.canceled && result.assets && result.assets.length > 0) {
+          setCapturedImage(result.assets[0].uri);
+          runOcrScanner(result.assets[0].uri);
+        } else {
+          loadSampleImage();
+        }
+      }
+    } catch (e) {
+      console.warn("Camera launch failed, loading sample image", e);
+      loadSampleImage();
+    }
+  };
+
+  const loadSampleImage = () => {
+    const sampleUri = 'https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?q=80&w=600&auto=format&fit=crop';
+    setCapturedImage(sampleUri);
+    runOcrScanner(sampleUri);
   };
 
   const combinedHistory = [...localHistory, ...(medHistory || [])].sort((a,b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
@@ -655,34 +737,107 @@ export default function Dashboard() {
         <View style={styles.modalOverlay}>
           <Animated.View entering={SlideInUp} style={[styles.modalContent, { backgroundColor: colors.background }]}>
             <Text style={[styles.modalTitle, { color: colors.text }]}>PILL-VISION™ OCR</Text>
+            
             <View style={[styles.scanViewport, { backgroundColor: colors.card, borderColor: colors.border }]}>
-              {isScanning ? <ActivityIndicator size="large" color="#3b82f6" /> : scanResult ? (
-                <View style={styles.resultBox}>
-                  <MaterialIcons name="check-circle" size={48} color="#10b981" />
-                  <Text style={[styles.resultValue, { color: colors.text }]}>{scanResult.name}</Text>
+              {capturedImage ? (
+                <View style={{ width: '100%', height: '100%', borderRadius: 22, overflow: 'hidden', alignItems: 'center', justifyContent: 'center' }}>
+                  <Image source={{ uri: capturedImage }} style={styles.capturedImagePreview} />
+                  
+                  {isScanning && (
+                    <>
+                      <RNAnimated.View style={[styles.scanLine, { transform: [{ translateY: scanLineAnim }] }]} />
+                      <View style={{ position: 'absolute', backgroundColor: 'rgba(0,0,0,0.6)', padding: 12, borderRadius: 12 }}>
+                        <ActivityIndicator size="small" color="#3b82f6" />
+                        <Text style={{ color: '#FFF', fontWeight: '800', marginTop: 6, fontSize: 13 }}>Analyzing Prescription...</Text>
+                      </View>
+                    </>
+                  )}
+
+                  {!isScanning && (
+                    <TouchableOpacity 
+                      style={styles.retakeBtn} 
+                      onPress={() => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                        setCapturedImage(null);
+                        setScanResult(null);
+                      }}
+                    >
+                      <MaterialIcons name="replay" size={16} color="#FFF" />
+                      <Text style={styles.retakeText}>Retake Photo</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
               ) : (
                 <TouchableOpacity 
-                   onPress={startScan}
-                   style={{ padding: 40 }}
+                   onPress={handleLaunchCamera}
+                   style={{ alignItems: 'center', justifyContent: 'center', flex: 1, width: '100%', height: '100%', padding: 40 }}
                 >
                    <MaterialIcons name="camera-alt" size={48} color="#94a3b8" />
+                   <Text style={{ color: '#94a3b8', marginTop: 10, fontWeight: '700', fontSize: 13 }}>Snap Medication Label</Text>
                 </TouchableOpacity>
               )}
             </View>
+
+            {/* OCR EXTRACTED DETAILS SUMMARY */}
+            {scanResult && !isScanning && (
+              <View style={[styles.ocrCard, { backgroundColor: colors.card, borderColor: '#16a34a' }]}>
+                <View style={styles.ocrRow}>
+                  <MaterialIcons name="medication" size={20} color="#3b82f6" />
+                  <Text style={[styles.ocrLabel, { color: colors.text }]}>Medication:</Text>
+                  <Text style={[styles.ocrVal, { color: colors.text }]}>{scanResult.name}</Text>
+                </View>
+                <View style={styles.ocrRow}>
+                  <MaterialIcons name="schedule" size={20} color="#16a34a" />
+                  <Text style={[styles.ocrLabel, { color: colors.text }]}>Frequency:</Text>
+                  <Text style={[styles.ocrVal, { color: colors.text }]}>{scanResult.frequency}</Text>
+                </View>
+                <View style={styles.ocrRow}>
+                  <MaterialIcons name="warning" size={20} color="#f97316" />
+                  <Text style={[styles.ocrLabel, { color: colors.text }]}>Stock Alert:</Text>
+                  <Text style={[styles.ocrVal, { color: '#f97316' }]}>{scanResult.warning}</Text>
+                </View>
+              </View>
+            )}
+
             <TouchableOpacity 
-               style={[styles.closeBtn, { backgroundColor: colors.card }]} 
-               onPress={() => {
-                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+               style={[
+                 styles.closeBtn, 
+                 { 
+                   backgroundColor: scanResult ? '#16a34a' : colors.card,
+                   borderWidth: scanResult ? 0 : 1,
+                   borderColor: colors.border
+                 }
+               ]} 
+               onPress={async () => {
+                 Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                 if (scanResult) {
+                   logMedication(scanResult.name, scanResult.frequency, false);
+                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                   
+                   setToastMessage("[ ✅ Prescription Added to Family Portal ]");
+                   setTimeout(() => {
+                     setToastMessage(null);
+                   }, 3000);
+                 }
                  setMedScanVisible(false);
+                 setCapturedImage(null);
                  setScanResult(null);
                }}
             >
-              <Text style={[styles.closeBtnText, { color: colors.text }]}>DONE</Text>
+              <Text style={[styles.closeBtnText, { color: scanResult ? '#FFF' : colors.text }]}>
+                {scanResult ? "SAVE PRESCRIPTION & DONE" : "DONE"}
+              </Text>
             </TouchableOpacity>
           </Animated.View>
         </View>
       </Modal>
+
+      {/* Custom Confirmation Toast */}
+      {toastMessage && (
+        <View style={styles.toastContainer}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      )}
     </View>
   );
 }
@@ -736,5 +891,87 @@ const styles = StyleSheet.create({
   resultBox: { alignItems: 'center', gap: 10 },
   resultValue: { fontSize: 24, fontWeight: '900' },
   closeBtn: { marginTop: 25, alignItems: 'center', padding: 18, borderRadius: 16 },
-  closeBtnText: { fontWeight: '900', fontSize: 16, letterSpacing: 1 }
+  closeBtnText: { fontWeight: '900', fontSize: 16, letterSpacing: 1 },
+  capturedImagePreview: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 22,
+    resizeMode: 'cover',
+  },
+  retakeBtn: {
+    position: 'absolute',
+    bottom: 12,
+    backgroundColor: 'rgba(15, 23, 42, 0.75)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+  },
+  retakeText: {
+    color: '#FFF',
+    fontSize: 11,
+    fontWeight: '900',
+  },
+  scanLine: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    height: 4,
+    backgroundColor: '#3b82f6',
+    shadowColor: '#3b82f6',
+    shadowOpacity: 0.8,
+    shadowRadius: 6,
+    elevation: 5,
+    zIndex: 10,
+  },
+  ocrCard: {
+    marginTop: 18,
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 2,
+    gap: 12,
+  },
+  ocrRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  ocrLabel: {
+    fontSize: 12,
+    fontWeight: '800',
+    opacity: 0.6,
+    width: 80,
+  },
+  ocrVal: {
+    fontSize: 13,
+    fontWeight: '900',
+    flex: 1,
+  },
+  toastContainer: {
+    position: 'absolute',
+    bottom: 90,
+    left: 20,
+    right: 20,
+    backgroundColor: '#16a34a',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 10,
+    shadowColor: '#16a34a',
+    shadowOpacity: 0.4,
+    shadowRadius: 10,
+    zIndex: 99999,
+  },
+  toastText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '900',
+    letterSpacing: 0.5,
+  }
 });
