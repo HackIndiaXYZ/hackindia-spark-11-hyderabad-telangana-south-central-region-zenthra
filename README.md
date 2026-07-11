@@ -107,7 +107,7 @@ CorAssist/
 | **Explainable AI (XAI)** | SHAP / LIME Libraries (Alert Justification) |
 | **External Routing** | Twilio API (Simulated Autonomous SOS Dispatch) |
 
-<br>
+---
 
 ###  Hardware Node Components
 
@@ -119,7 +119,6 @@ CorAssist/
 | **Power Supply** | **3.7V Lithium-Polymer (LiPo) Battery:** Lightweight, rechargeable power source to mimic a consumer wearable form factor. |
 ---
 
-<<<<<<< HEAD
 ## ⚖️ Regulatory & Clinical Compliance
 
 CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways. 
@@ -130,7 +129,7 @@ CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways.
 
 ---
 
-## 🏗️ Product Viability & T-Hub Shortlist Specs
+## 🏗️ Product Viability 
 
 | Metric | Specification |
 | :--- | :--- |
@@ -144,9 +143,6 @@ CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways.
 ---
 
 ## 🚀 Key Features
-=======
-## Key Features
->>>>>>> bc3a5117e91c011bae4f527cefe96d39104e6118
 
 ### Predictive LSTM Time-Series Forecasting
 - Integrates a Long Short-Term Memory (LSTM) neural network trained on live electrocardiogram time-series data
@@ -201,6 +197,7 @@ CorAssist is engineered for **CDSCO SaMD Class B** and **FDA 510(k)** pathways.
 - Features tactile haptic pulse synchronisation allowing users to feel vitals without looking at a screen
 - Integrates voice-synthesised critical warnings for reliable auditory notification
 - Employs shape-based visual indicators ensuring full usability for colour-blind patients
+  
 ---
 
 ## Installation & Setup
@@ -283,9 +280,9 @@ CorAssist is designed as a **software-first, sensor-agnostic** platform. While c
 ---
 
 ##  Hackathon Submission
-- **Event**: T-Hub Hyderabad Biggest AI Hackathon
-- **Theme**: Open Innovation
-- **Dev Post / Project ID**: CorAssist
+- **Event**: HackIndia Spark-11 Hyderabad, Telangana South Central Region
+- **Theme**: 🧠 DeepTech Innovation
+- **Project Lead**: B.Bhuvana Sarada
 
 ---
 
