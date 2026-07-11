@@ -65,22 +65,49 @@ export function CardiacProvider({ children }: { children: React.ReactNode }) {
     respiration: 14,
     emergency_active: false
   });
-  
+  const [history, setHistory] = useState<CardiacHistoryEntry[]>([]);
+  const [medHistory, setMedHistory] = useState<MedicationEntry[]>([]);
+  const [inventory, setInventory] = useState<InventoryItem[]>([
+    { name: 'Aspirin 81mg', totalPills: 30, dailyDosage: 1, stockStatus: 'Healthy' }
+  ]);
+
   const triggerEmergency = (active: boolean) => {
     setLiveState(prev => ({ ...prev, emergency_active: active }));
+  };
+
+  const logMedication = (name: string, dosage: string, isSimulated = false) => {
+    const entry: MedicationEntry = {
+      timestamp: new Date().toISOString(),
+      name,
+      dosage,
+      isSimulated
+    };
+    setMedHistory(prev => [entry, ...prev]);
+  };
+
+  const markPillTaken = (medName: string) => {
+    setInventory(prev =>
+      prev.map(item =>
+        item.name === medName
+          ? {
+              ...item,
+              totalPills: Math.max(0, item.totalPills - item.dailyDosage),
+              stockStatus: item.totalPills - item.dailyDosage <= 0 ? 'Empty' : (item.totalPills - item.dailyDosage <= 5 ? 'Low' : 'Healthy')
+            }
+          : item
+      )
+    );
   };
 
   return (
     <CardiacDataContext.Provider value={{
       liveState,
-      history: [],
-      medHistory: [],
-      inventory: [
-        { name: 'Aspirin 81mg', totalPills: 30, dailyDosage: 1, stockStatus: 'Healthy' }
-      ],
+      history,
+      medHistory,
+      inventory,
       triggerEmergency,
-      logMedication: () => {},
-      markPillTaken: () => {},
+      logMedication,
+      markPillTaken
     }}>
       {children}
     </CardiacDataContext.Provider>
