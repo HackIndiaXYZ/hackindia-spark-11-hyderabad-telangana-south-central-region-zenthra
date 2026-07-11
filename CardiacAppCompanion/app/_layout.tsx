@@ -10,6 +10,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { AppProvider, AppContext } from '../src/context/AppContext';
 import audioService from '../src/services/AudioService';
 import voiceService from '../src/services/VoiceService';
+import SeniorOSOverlayTrigger from '../src/components/senior_os/SeniorOSOverlayTrigger';
 
 function RootLayoutNav() {
   const { theme, colors } = useTheme();
@@ -76,6 +77,7 @@ function RootLayoutNav() {
         <Stack.Screen name="identity" options={{ presentation: 'modal', title: 'Patient Profile' }} />
         <Stack.Screen name="math" options={{ presentation: 'modal' }} />
       </Stack>
+      <SeniorOSOverlayTrigger />
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );

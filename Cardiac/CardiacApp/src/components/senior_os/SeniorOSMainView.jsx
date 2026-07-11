@@ -29,7 +29,7 @@ try {
 }
 
 
-function SeniorOSContent() {
+function SeniorOSContent({ onClose }) {
   const { 
     fontSize, 
     highContrast, 
@@ -203,6 +203,11 @@ function SeniorOSContent() {
             <MaterialIcons name="contrast" size={16} color={highContrast ? "#000" : "#FFF"} />
             <Text style={{ fontSize: 11, color: highContrast ? "#000" : "#FFF", fontWeight: 'bold', marginLeft: 4 }}>THEME</Text>
           </TouchableOpacity>
+          {onClose && (
+            <TouchableOpacity style={[styles.controlBtn, { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }]} onPress={onClose}>
+              <MaterialIcons name="close" size={24} color="#ef4444" />
+            </TouchableOpacity>
+          )}
         </View>
       </View>
 
@@ -387,10 +392,10 @@ function SeniorOSContent() {
   );
 }
 
-export default function SeniorOSMainView() {
+export default function SeniorOSMainView({ onClose = undefined } = {}) {
   return (
     <SeniorAccessibilityProvider>
-      <SeniorOSContent />
+      <SeniorOSContent onClose={onClose} />
     </SeniorAccessibilityProvider>
   );
 }

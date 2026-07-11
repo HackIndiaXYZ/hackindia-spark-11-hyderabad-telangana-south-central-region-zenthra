@@ -15,6 +15,7 @@ import voiceService from '../src/services/VoiceService';
 import LockScreen from './lock';
 import OnboardingScreen from './onboarding';
 import WelcomeScreen from '../src/components/WelcomeScreen';
+import SeniorOSOverlayTrigger from '../src/components/senior_os/SeniorOSOverlayTrigger';
 
 function RootLayoutNav() {
   const { theme, colors, hasSelectedTheme } = useTheme();
@@ -83,6 +84,7 @@ function RootLayoutNav() {
       {isAppLocked && <LockScreen />}
       {!hasSelectedTheme && <WelcomeScreen />}
       {hasSelectedTheme && !hasCompletedOnboarding && <OnboardingScreen />}
+      <SeniorOSOverlayTrigger />
       <StatusBar style={theme === 'dark' ? 'light' : 'dark'} />
     </ThemeProvider>
   );
@@ -103,7 +105,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     zIndex: 2000,
-    backdropFilter: 'blur(10px)', // Web/Advanced OS support
+    ...Platform.select({
+      web: {
+        backdropFilter: 'blur(10px)',
+      } as any,
+      default: {},
+    }),
   },
   demoDot: {
     width: 6,
