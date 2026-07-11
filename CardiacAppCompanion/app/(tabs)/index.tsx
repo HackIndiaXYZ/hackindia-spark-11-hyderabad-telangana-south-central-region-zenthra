@@ -8,7 +8,6 @@ import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import * as Haptics from 'expo-haptics';
 import * as Speech from 'expo-speech';
-import { useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import { MaterialIcons, MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useCardiacData } from '../../src/context/CardiacDataContext';
@@ -124,7 +123,6 @@ export default function Dashboard() {
   const [sosCountdown, setSosCountdown] = useState(10);
   const [rescueDispatched, setRescueDispatched] = useState(false);
 
-  const [permission, requestPermission] = useCameraPermissions();
   const countdownInterval = useRef<any>(null);
   const speechInterval = useRef<any>(null);
   const emergencyFlash = useSharedValue(0);
