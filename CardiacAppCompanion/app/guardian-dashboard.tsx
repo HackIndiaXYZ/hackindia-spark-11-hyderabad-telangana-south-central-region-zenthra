@@ -378,7 +378,7 @@ export default function GuardianDashboard() {
              <TouchableOpacity 
                onPress={() => {
                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                 router.push('/_(tabs)');
+                 router.push('/(tabs)');
                }} 
                style={[styles.switchBtn, { backgroundColor: '#3b82f6' }]}
              >

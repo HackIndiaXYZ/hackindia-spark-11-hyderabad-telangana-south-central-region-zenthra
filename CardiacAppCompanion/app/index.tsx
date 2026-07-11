@@ -28,7 +28,7 @@ export default function GatewayLanding() {
       // Navigate after success state is briefly shown
       setTimeout(() => {
         if (role === 'patient') {
-          router.replace('/_(tabs)');
+          router.replace('/(tabs)');
         } else {
           router.replace('/guardian-dashboard');
         }

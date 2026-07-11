@@ -78,7 +78,7 @@ export default function SettingsScreen() {
           onPress: () => {
             Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
             if (triggerEmergency) triggerEmergency(true);
-            router.push('/_(tabs)');
+            router.push('/(tabs)');
           }
         }
       ]
