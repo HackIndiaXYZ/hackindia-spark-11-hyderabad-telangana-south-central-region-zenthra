@@ -9,6 +9,7 @@ import CaregiverRelayHub from './CaregiverRelayHub';
 import SeniorOSDemoSuite from './SeniorOSDemoSuite';
 import * as Print from 'expo-print';
 import * as Sharing from 'expo-sharing';
+import * as Haptics from 'expo-haptics';
 
 // CONTEXT IMPORT FALLBACK: safely wrap useCardiacData import with fallback dummy state
 let useCardiacData;
@@ -187,8 +188,8 @@ function SeniorOSContent({ onClose }) {
       <View style={[styles.accessBar, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
         <View style={styles.branding}>
           <MaterialIcons name="security" size={24} color={themeStyles.primary} />
-          <Text style={[getResponsiveStyle(14), { fontWeight: '950', color: themeStyles.text, marginLeft: 6 }]}>
-            CORASSIST SENIOR OS
+          <Text style={[getResponsiveStyle(14, true), { fontWeight: '950', color: themeStyles.text, marginLeft: 6 }]}>
+            SENIOR OS
           </Text>
         </View>
 
@@ -200,9 +201,21 @@ function SeniorOSContent({ onClose }) {
             <Text style={{ fontSize: 18, color: themeStyles.text, fontWeight: 'bold' }}>A+</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.controlBtnContrast, { borderColor: themeStyles.border, backgroundColor: themeStyles.primary }]} onPress={toggleHighContrast}>
-            <MaterialIcons name="contrast" size={16} color={highContrast ? "#000" : "#FFF"} />
-            <Text style={{ fontSize: 11, color: highContrast ? "#000" : "#FFF", fontWeight: 'bold', marginLeft: 4 }}>THEME</Text>
+            <MaterialIcons name="contrast" size={16} color={themeStyles.mode === 'light' ? "#FFF" : "#000"} />
+            <Text style={{ fontSize: 11, color: themeStyles.mode === 'light' ? "#FFF" : "#000", fontWeight: 'bold', marginLeft: 4 }}>THEME</Text>
           </TouchableOpacity>
+          
+          {/* URGENT SOS ACTION BUTTON */}
+          <TouchableOpacity 
+            style={styles.sosTopBtn} 
+            onPress={() => {
+              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy); } catch (e) {}
+              triggerEmergency(true);
+            }}
+          >
+            <Text style={{ fontSize: 13, color: '#FFF', fontWeight: '900' }}>🆘 SOS</Text>
+          </TouchableOpacity>
+
           {onClose && (
             <TouchableOpacity style={[styles.controlBtn, { borderColor: '#ef4444', backgroundColor: 'rgba(239, 68, 68, 0.1)' }]} onPress={onClose}>
               <MaterialIcons name="close" size={24} color="#ef4444" />
@@ -222,47 +235,53 @@ function SeniorOSContent({ onClose }) {
       {/* CORE VIEW BODY */}
       <View style={styles.tabContentContainer}>
         {activeTab === 'health' && (
-          <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
             {/* Telemetry Panel */}
             <View style={[styles.telemetryCard, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
               <View style={styles.cardHeader}>
                 <MaterialIcons name="favorite" size={24} color="#ef4444" />
-                <Text style={[getResponsiveStyle(16), { fontWeight: '900', color: themeStyles.text, marginLeft: 6 }]}>
+                <Text style={[getResponsiveStyle(16, true), { fontWeight: '900', color: themeStyles.text, marginLeft: 6 }]}>
                   Jane{"'"}s Telemetry Guard
                 </Text>
-
               </View>
 
               <View style={styles.metricsRow}>
                 <View style={styles.metricBlock}>
-                  <Text style={[getResponsiveStyle(11), { color: themeStyles.textMuted }]}>HEART RATE</Text>
-                  <Text style={[getResponsiveStyle(26), { fontWeight: '950', color: liveState.alert_level === 'Critical' ? '#ef4444' : themeStyles.accent }]}>
+                  <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, fontWeight: '700' }]}>HEART RATE</Text>
+                  <Text style={[getResponsiveStyle(26), { fontWeight: '900', color: liveState.alert_level === 'Critical' ? '#ef4444' : themeStyles.accent }]}>
                     {liveState.hr || 72} <Text style={{ fontSize: 14 }}>BPM</Text>
                   </Text>
                 </View>
 
                 <View style={styles.metricBlock}>
-                  <Text style={[getResponsiveStyle(11), { color: themeStyles.textMuted }]}>LYAPUNOV STABILITY</Text>
-                  <Text style={[getResponsiveStyle(26), { fontWeight: '950', color: themeStyles.accent }]}>
+                  <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, fontWeight: '700' }]}>STABILITY INDEX</Text>
+                  <Text style={[getResponsiveStyle(26), { fontWeight: '900', color: themeStyles.accent }]}>
                     {liveState.stability || 74}%
                   </Text>
                 </View>
               </View>
 
-              <View style={[styles.statusBanner, { backgroundColor: liveState.alert_level === 'Critical' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(16, 185, 129, 0.15)', borderColor: liveState.alert_level === 'Critical' ? '#ef4444' : '#10b981' }]}>
-                <View style={[styles.statusDot, { backgroundColor: liveState.alert_level === 'Critical' ? '#ef4444' : '#10b981' }]} />
-                <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: liveState.alert_level === 'Critical' ? '#ef4444' : '#10b981', marginLeft: 8 }]}>
-                  HEALTH STATUS: {liveState.alert_level === 'Critical' ? 'CRITICAL DISTRESS' : 'STABLE & NORMAL'}
+              <View style={[
+                styles.statusBanner, 
+                { 
+                  backgroundColor: liveState.alert_level === 'Critical' ? 'rgba(239, 68, 68, 0.15)' : 'rgba(22, 163, 74, 0.15)', 
+                  borderColor: liveState.alert_level === 'Critical' ? '#ef4444' : '#16a34a',
+                  borderWidth: 2
+                }
+              ]}>
+                <View style={[styles.statusDot, { backgroundColor: liveState.alert_level === 'Critical' ? '#ef4444' : '#16a34a' }]} />
+                <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: liveState.alert_level === 'Critical' ? '#ef4444' : '#16a34a', marginLeft: 8 }]}>
+                  STATUS: {liveState.alert_level === 'Critical' ? 'CRITICAL DISTRESS' : 'STABLE & NORMAL'}
                 </Text>
               </View>
             </View>
 
             {/* Read-only existing fail-safe description */}
             <View style={[styles.descriptionCard, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
-              <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.text, marginBottom: 6 }]}>
+              <Text style={[getResponsiveStyle(14, true), { fontWeight: '900', color: themeStyles.text, marginBottom: 6 }]}>
                 🛡️ Continuous Protection Protocol
               </Text>
-              <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted }]}>
+              <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, fontWeight: '500' }]}>
                 If your heart stability drops below safe margins, the system triggers a 10-second fail-safe countdown. You can cancel it if you are okay, otherwise an autonomous medical ambulance is dispatched.
               </Text>
               
@@ -348,42 +367,56 @@ function SeniorOSContent({ onClose }) {
       {/* ACCESS-OPTIMIZED BOTTOM NAVIGATION BAR (>= 60x60 touch target, large icon/text labels) */}
       <View style={[styles.navBar, { backgroundColor: themeStyles.cardBackground, borderTopColor: themeStyles.border }]}>
         <TouchableOpacity 
-          style={[styles.navTab, activeTab === 'health' && { backgroundColor: themeStyles.background }]} 
+          style={[
+            styles.navTab, 
+            activeTab === 'health' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
+          ]} 
           onPress={() => setActiveTab('health')}
         >
-          <MaterialIcons name="favorite" size={26} color={activeTab === 'health' ? themeStyles.accent : themeStyles.textMuted} />
-          <Text style={[getResponsiveStyle(10), { fontWeight: '950', color: activeTab === 'health' ? themeStyles.accent : themeStyles.textMuted, marginTop: 4 }]}>
+          <MaterialIcons name="favorite" size={24} color={activeTab === 'health' ? themeStyles.primary : themeStyles.textMuted} />
+          <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'health' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
             Health Guard
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.navTab, activeTab === 'voice' && { backgroundColor: themeStyles.background }]} 
+          style={[
+            styles.navTab, 
+            activeTab === 'voice' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
+          ]} 
           onPress={() => setActiveTab('voice')}
         >
-          <MaterialIcons name="keyboard-voice" size={26} color={activeTab === 'voice' ? themeStyles.accent : themeStyles.textMuted} />
-          <Text style={[getResponsiveStyle(10), { fontWeight: '955', color: activeTab === 'voice' ? themeStyles.accent : themeStyles.textMuted, marginTop: 4 }]}>
+          <MaterialIcons name="keyboard-voice" size={24} color={activeTab === 'voice' ? themeStyles.primary : themeStyles.textMuted} />
+          <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'voice' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
             Voice Bot
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.navTab, activeTab === 'schemes' && { backgroundColor: themeStyles.background }]} 
+          style={[
+            styles.navTab, 
+            activeTab === 'schemes' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
+          ]} 
           onPress={() => setActiveTab('schemes')}
         >
-          <MaterialIcons name="verified-user" size={26} color={activeTab === 'schemes' ? themeStyles.accent : themeStyles.textMuted} />
-          <Text style={[getResponsiveStyle(10), { fontWeight: '955', color: activeTab === 'schemes' ? themeStyles.accent : themeStyles.textMuted, marginTop: 4 }]}>
+          <MaterialIcons name="verified-user" size={24} color={activeTab === 'schemes' ? themeStyles.primary : themeStyles.textMuted} />
+          <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'schemes' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
             Welfare Aid
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity 
-          style={[styles.navTab, activeTab === 'caregiver' && { backgroundColor: themeStyles.background }]} 
+          style={[
+            styles.navTab, 
+            activeTab === 'caregiver' && { backgroundColor: themeStyles.background, borderTopWidth: 4, borderTopColor: themeStyles.primary }
+          ]} 
           onPress={() => setActiveTab('caregiver')}
         >
-          <MaterialIcons name="family-restroom" size={26} color={activeTab === 'caregiver' ? themeStyles.accent : themeStyles.textMuted} />
-          {alerts.length > 0 && <View style={styles.alertCounter} />}
-          <Text style={[getResponsiveStyle(10), { fontWeight: '955', color: activeTab === 'caregiver' ? themeStyles.accent : themeStyles.textMuted, marginTop: 4 }]}>
+          <View style={{ position: 'relative' }}>
+            <MaterialIcons name="family-restroom" size={24} color={activeTab === 'caregiver' ? themeStyles.primary : themeStyles.textMuted} />
+            {alerts.length > 0 && <View style={styles.alertCounter} />}
+          </View>
+          <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: activeTab === 'caregiver' ? themeStyles.primary : themeStyles.textMuted, marginTop: 2 }]}>
             Family Portal
           </Text>
         </TouchableOpacity>
@@ -408,9 +441,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderBottomWidth: 2,
   },
   branding: {
     flexDirection: 'row',
@@ -419,37 +452,45 @@ const styles = StyleSheet.create({
   controls: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 6,
   },
   controlBtn: {
-    width: 44,
-    height: 44,
+    width: 40,
+    height: 40,
     borderRadius: 12,
     borderWidth: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
   controlBtnContrast: {
-    height: 44,
-    paddingHorizontal: 10,
+    height: 40,
+    paddingHorizontal: 8,
     borderRadius: 12,
     borderWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
   },
+  sosTopBtn: {
+    backgroundColor: '#ef4444',
+    paddingHorizontal: 10,
+    height: 40,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   tabContentContainer: {
     flex: 1,
   },
   scrollContainer: {
-    padding: 15,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 100,
   },
   telemetryCard: {
-    padding: 18,
+    padding: 16,
     borderRadius: 24,
     borderWidth: 2,
-    marginBottom: 15,
+    marginBottom: 16,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -469,7 +510,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 12,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
   },
   statusDot: {
     width: 10,
@@ -477,10 +518,10 @@ const styles = StyleSheet.create({
     borderRadius: 5,
   },
   descriptionCard: {
-    padding: 18,
+    padding: 16,
     borderRadius: 24,
-    borderWidth: 1,
-    marginBottom: 15,
+    borderWidth: 2,
+    marginBottom: 16,
   },
   sosManualBtn: {
     height: 60, // Minimum 60px target
@@ -489,14 +530,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 18,
+    borderWidth: 2,
+    borderColor: '#FFF',
   },
   navBar: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     borderTopWidth: 2,
-    height: Platform.OS === 'ios' ? 95 : 85,
-    paddingBottom: Platform.OS === 'ios' ? 25 : 15,
-    paddingTop: 10,
+    height: 70,
+    paddingBottom: 8,
+    paddingTop: 4,
   },
   navTab: {
     flex: 1,
@@ -507,8 +550,8 @@ const styles = StyleSheet.create({
   },
   alertCounter: {
     position: 'absolute',
-    top: 6,
-    right: '35%',
+    top: -2,
+    right: -4,
     width: 8,
     height: 8,
     borderRadius: 4,
@@ -532,7 +575,7 @@ const styles = StyleSheet.create({
   },
   emergencyTitle: {
     fontSize: 26,
-    fontWeight: '900',
+    fontWeight: '950',
     color: '#FFF',
     textAlign: 'center',
     letterSpacing: 1.5,

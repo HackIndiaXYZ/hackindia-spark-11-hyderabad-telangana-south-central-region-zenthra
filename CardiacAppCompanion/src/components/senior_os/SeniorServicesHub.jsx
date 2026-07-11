@@ -90,17 +90,17 @@ export default function SeniorServicesHub() {
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
       {/* SECTION 1: ELIGIBILITY CHECKER */}
       <View style={[styles.sectionCard, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
         <View style={styles.sectionHeader}>
           <MaterialIcons name="verified-user" size={26} color={themeStyles.accent} />
-          <Text style={[getResponsiveStyle(18), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
+          <Text style={[getResponsiveStyle(18, true), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
             Welfare Scheme Eligibility
           </Text>
         </View>
 
-        <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, marginBottom: 15 }]}>
+        <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, marginBottom: 15, fontWeight: '500' }]}>
           Adjust details below to see which government schemes Jane qualifies for:
         </Text>
 
@@ -118,6 +118,7 @@ export default function SeniorServicesHub() {
                   color: themeStyles.text, 
                   borderColor: themeStyles.border,
                   fontSize: 18,
+                  borderWidth: 2,
                 }
               ]}
               value={age}
@@ -135,12 +136,13 @@ export default function SeniorServicesHub() {
                     styles.optionBtn,
                     { 
                       backgroundColor: income === inc ? themeStyles.primary : themeStyles.background,
-                      borderColor: themeStyles.border 
+                      borderColor: themeStyles.border,
+                      borderWidth: 2,
                     }
                   ]}
                   onPress={() => setIncome(inc)}
                 >
-                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: income === inc ? (themeStyles.highContrast ? '#000' : '#FFF') : themeStyles.text }]}>
+                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: income === inc ? '#FFF' : themeStyles.text }]}>
                     {inc.toUpperCase()}
                   </Text>
                 </TouchableOpacity>
@@ -158,12 +160,13 @@ export default function SeniorServicesHub() {
                     styles.optionBtn,
                     { 
                       backgroundColor: healthStatus === hlth ? themeStyles.primary : themeStyles.background,
-                      borderColor: themeStyles.border
+                      borderColor: themeStyles.border,
+                      borderWidth: 2,
                     }
                   ]}
                   onPress={() => setHealthStatus(hlth)}
                 >
-                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: healthStatus === hlth ? (themeStyles.highContrast ? '#000' : '#FFF') : themeStyles.text }]}>
+                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: healthStatus === hlth ? '#FFF' : themeStyles.text }]}>
                     {hlth.toUpperCase()}
                   </Text>
                 </TouchableOpacity>
@@ -184,27 +187,27 @@ export default function SeniorServicesHub() {
                   { 
                     backgroundColor: themeStyles.background, 
                     borderColor: eligible ? themeStyles.accent : themeStyles.border,
-                    borderWidth: eligible ? 3 : 1
+                    borderWidth: 2,
                   }
                 ]}
               >
                 <View style={styles.schemeCardHeader}>
-                  <Text style={[getResponsiveStyle(15), { fontWeight: '900', color: themeStyles.text, flex: 1 }]}>
+                  <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text, flex: 1 }]}>
                     {scheme.name}
                   </Text>
                   <View 
                     style={[
                       styles.statusBadge, 
-                      { backgroundColor: eligible ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)' }
+                      { backgroundColor: eligible ? 'rgba(22, 163, 74, 0.15)' : 'rgba(239, 68, 68, 0.15)' }
                     ]}
                   >
-                    <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: eligible ? '#10b981' : '#ef4444' }]}>
+                    <Text style={[getResponsiveStyle(11), { fontWeight: '900', color: eligible ? '#16a34a' : '#ef4444' }]}>
                       {eligible ? 'ELIGIBLE' : 'NOT ELIGIBLE'}
                     </Text>
                   </View>
                 </View>
 
-                <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, marginTop: 6 }]}>
+                <Text style={[getResponsiveStyle(13), { color: themeStyles.textMuted, marginTop: 6, fontWeight: '500' }]}>
                   {scheme.desc}
                 </Text>
                 <Text style={[getResponsiveStyle(12), { color: themeStyles.accent, fontWeight: '700', marginTop: 4 }]}>
@@ -220,7 +223,7 @@ export default function SeniorServicesHub() {
       <View style={[styles.sectionCard, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]}>
         <View style={styles.sectionHeader}>
           <MaterialIcons name="local-hospital" size={26} color={themeStyles.primary} />
-          <Text style={[getResponsiveStyle(18), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
+          <Text style={[getResponsiveStyle(18, true), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
             Quick Doctor Appointment
           </Text>
         </View>
@@ -240,10 +243,10 @@ export default function SeniorServicesHub() {
                 }}
               >
                 <View>
-                  <Text style={[getResponsiveStyle(15), { fontWeight: '900', color: themeStyles.text }]}>
+                  <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text }]}>
                     {s.name}
                   </Text>
-                  <Text style={[getResponsiveStyle(12), { color: themeStyles.accent, fontWeight: '700', marginTop: 2 }]}>
+                  <Text style={[getResponsiveStyle(13), { color: themeStyles.accent, fontWeight: '700', marginTop: 2 }]}>
                     Doctor: {s.doctor}
                   </Text>
                 </View>
@@ -267,7 +270,7 @@ export default function SeniorServicesHub() {
                   setWizardStep(3);
                 }}
               >
-                <Text style={[getResponsiveStyle(15), { fontWeight: '900', color: themeStyles.text }]}>
+                <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text }]}>
                   {time}
                 </Text>
                 <MaterialIcons name="alarm" size={24} color={themeStyles.primary} />
@@ -287,28 +290,28 @@ export default function SeniorServicesHub() {
         {wizardStep === 3 && (
           <View style={styles.confirmContainer}>
             <View style={styles.successIconWrapper}>
-              <MaterialIcons name="check-circle" size={54} color="#10b981" />
+              <MaterialIcons name="check-circle" size={54} color="#16a34a" />
             </View>
 
-            <Text style={[getResponsiveStyle(18), { fontWeight: '900', color: themeStyles.text, textAlign: 'center', marginVertical: 8 }]}>
+            <Text style={[getResponsiveStyle(18, true), { fontWeight: '900', color: themeStyles.text, textAlign: 'center', marginVertical: 8 }]}>
               Appointment Scheduled!
             </Text>
             
             <View style={[styles.bookingCard, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}>
               <Text style={[getResponsiveStyle(14), { color: themeStyles.textMuted, fontWeight: '700' }]}>SPECIALTY</Text>
-              <Text style={[getResponsiveStyle(15), { color: themeStyles.text, fontWeight: '900', marginVertical: 4 }]}>
+              <Text style={[getResponsiveStyle(15, true), { color: themeStyles.text, fontWeight: '900', marginVertical: 4 }]}>
                 {selectedSpecialty}
               </Text>
               <Text style={[getResponsiveStyle(14), { color: themeStyles.textMuted, fontWeight: '700', marginTop: 10 }]}>CONFIRMED TIME</Text>
-              <Text style={[getResponsiveStyle(15), { color: themeStyles.accent, fontWeight: '900', marginVertical: 4 }]}>
+              <Text style={[getResponsiveStyle(15, true), { color: themeStyles.accent, fontWeight: '900', marginVertical: 4 }]}>
                 {selectedTime}
               </Text>
             </View>
 
             {reminderAdded ? (
-              <View style={[styles.reminderAlert, { backgroundColor: 'rgba(16,185,129,0.15)', borderColor: '#10b981' }]}>
-                <MaterialIcons name="volume-up" size={20} color="#10b981" />
-                <Text style={[getResponsiveStyle(13), { color: '#10b981', fontWeight: '900', marginLeft: 8 }]}>
+              <View style={[styles.reminderAlert, { backgroundColor: 'rgba(22, 163, 74, 0.15)', borderColor: '#16a34a' }]}>
+                <MaterialIcons name="volume-up" size={20} color="#16a34a" />
+                <Text style={[getResponsiveStyle(13), { color: '#16a34a', fontWeight: '900', marginLeft: 8 }]}>
                   Added to Voice Reminders!
                 </Text>
               </View>
@@ -317,8 +320,8 @@ export default function SeniorServicesHub() {
                 style={[styles.voiceReminderBtn, { backgroundColor: themeStyles.primary }]}
                 onPress={handleSpeechReminder}
               >
-                <MaterialIcons name="keyboard-voice" size={24} color={themeStyles.highContrast ? "#000" : "#FFF"} />
-                <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.highContrast ? "#000" : "#FFF", marginLeft: 8 }]}>
+                <MaterialIcons name="keyboard-voice" size={24} color={themeStyles.mode === 'light' ? '#FFF' : '#000'} />
+                <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.mode === 'light' ? '#FFF' : '#000', marginLeft: 8 }]}>
                   ADD TO VOICE REMINDERS
                 </Text>
               </TouchableOpacity>
@@ -344,14 +347,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    padding: 15,
-    paddingBottom: 40,
+    padding: 16,
+    paddingBottom: 100,
   },
   sectionCard: {
-    padding: 18,
+    padding: 16,
     borderRadius: 24,
     borderWidth: 2,
-    marginBottom: 20,
+    marginBottom: 16,
   },
   sectionHeader: {
     flexDirection: 'row',
@@ -369,7 +372,7 @@ const styles = StyleSheet.create({
     height: 50,
     width: 80,
     borderRadius: 12,
-    borderWidth: 1,
+    borderWidth: 2,
     paddingHorizontal: 12,
     fontWeight: 'bold',
   },
@@ -379,9 +382,9 @@ const styles = StyleSheet.create({
   },
   optionBtn: {
     flex: 1,
-    height: 50, // Minimum 60px target for the screen tap generally
+    height: 50,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 8,
@@ -390,9 +393,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   schemeCard: {
-    padding: 14,
+    padding: 16,
     borderRadius: 18,
-    borderWidth: 1,
+    borderWidth: 2,
+    marginBottom: 16,
   },
   schemeCardHeader: {
     flexDirection: 'row',
@@ -408,16 +412,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 18,
+    padding: 16,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     marginVertical: 6,
-    height: 70, // >= 60px touch target
+    height: 70,
   },
   backBtn: {
     height: 50,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 10,
@@ -430,7 +434,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    backgroundColor: 'rgba(16,185,129,0.1)',
+    backgroundColor: 'rgba(22, 163, 74, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 10,
@@ -439,12 +443,12 @@ const styles = StyleSheet.create({
     width: '100%',
     padding: 16,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     marginVertical: 12,
   },
   voiceReminderBtn: {
     width: '100%',
-    height: 60, // Enforce 60px target
+    height: 60,
     borderRadius: 16,
     flexDirection: 'row',
     justifyContent: 'center',
@@ -455,7 +459,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 60,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
@@ -465,7 +469,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 50,
     borderRadius: 14,
-    borderWidth: 1,
+    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 5,

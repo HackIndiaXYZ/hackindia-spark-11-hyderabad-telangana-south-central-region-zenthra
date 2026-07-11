@@ -96,21 +96,21 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
               styles.messageBubble, 
               m.sender === 'ai' 
                 ? [styles.aiBubble, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]
-                : [styles.seniorBubble, { backgroundColor: themeStyles.primary }]
+                : [styles.seniorBubble, { backgroundColor: themeStyles.primary, borderColor: themeStyles.border }]
             ]}
           >
             <View style={styles.bubbleHeader}>
               <MaterialIcons 
                 name={m.sender === 'ai' ? 'face' : 'person'} 
                 size={22} 
-                color={m.sender === 'ai' ? themeStyles.accent : (themeStyles.highContrast ? '#000' : '#FFF')} 
+                color={m.sender === 'ai' ? themeStyles.accent : '#FFF'} 
               />
               <Text 
                 style={[
-                  getResponsiveStyle(12), 
+                  getResponsiveStyle(12, true), 
                   { 
                     fontWeight: '900', 
-                    color: m.sender === 'ai' ? themeStyles.accent : (themeStyles.highContrast ? '#000' : '#FFF'),
+                    color: m.sender === 'ai' ? themeStyles.accent : '#FFF',
                     marginLeft: 6 
                   }
                 ]}
@@ -122,7 +122,7 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
               style={[
                 getResponsiveStyle(16), 
                 { 
-                  color: m.sender === 'ai' ? themeStyles.text : (themeStyles.highContrast ? '#000' : '#FFF'),
+                  color: m.sender === 'ai' ? themeStyles.text : '#FFF',
                   fontWeight: '600',
                   marginTop: 6
                 }
@@ -138,24 +138,24 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
           <View style={[styles.pharmacySection, { borderColor: themeStyles.border, backgroundColor: themeStyles.cardBackground }]}>
             <View style={styles.pharmacyHeader}>
               <MaterialIcons name="local-pharmacy" size={24} color="#ef4444" />
-              <Text style={[getResponsiveStyle(16), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
+              <Text style={[getResponsiveStyle(16, true), { fontWeight: '900', color: themeStyles.text, marginLeft: 8 }]}>
                 Nearby Medical Stores
               </Text>
             </View>
-            <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, marginBottom: 15 }]}>
+            <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, marginBottom: 15, fontWeight: '500' }]}>
               {coords ? `Showing stores closest to your current location.` : `No GPS access. Showing stores near Secunderabad.`}
             </Text>
 
             {pharmacies.map((p, idx) => (
               <View key={idx} style={[styles.pharmacyCard, { backgroundColor: themeStyles.background, borderColor: themeStyles.border }]}>
                 <View style={styles.pharmacyInfo}>
-                  <Text style={[getResponsiveStyle(15), { fontWeight: '800', color: themeStyles.text }]}>
+                  <Text style={[getResponsiveStyle(15, true), { fontWeight: '900', color: themeStyles.text }]}>
                     {p.name}
                   </Text>
                   <Text style={[getResponsiveStyle(13), { color: themeStyles.accent, fontWeight: '700', marginTop: 2 }]}>
                     📍 Distance: {p.distance} meters
                   </Text>
-                  <Text style={[getResponsiveStyle(11), { color: themeStyles.textMuted, marginTop: 4 }]} numberOfLines={1}>
+                  <Text style={[getResponsiveStyle(12), { color: themeStyles.textMuted, marginTop: 4, fontWeight: '500' }]} numberOfLines={1}>
                     {p.address}
                   </Text>
                 </View>
@@ -164,8 +164,8 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
                   style={[styles.navigateBtn, { backgroundColor: themeStyles.primary }]}
                   onPress={() => handleNavigate(p)}
                 >
-                  <MaterialIcons name="directions" size={24} color={themeStyles.highContrast ? "#000" : "#FFF"} />
-                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: themeStyles.highContrast ? "#000" : "#FFF", marginLeft: 4 }]}>
+                  <MaterialIcons name="directions" size={24} color="#FFF" />
+                  <Text style={[getResponsiveStyle(12), { fontWeight: '900', color: '#FFF', marginLeft: 4 }]}>
                     NAVIGATE
                   </Text>
                 </TouchableOpacity>
@@ -175,14 +175,14 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
         )}
       </ScrollView>
 
-      {/* Quick Action Chips (Strict minimum size of 60x60 pixels overall container target / generous spacing) */}
+      {/* Quick Action Chips */}
       <View style={styles.chipsContainer}>
         <TouchableOpacity 
           style={[styles.chip, { backgroundColor: themeStyles.cardBackground, borderColor: themeStyles.border }]} 
           onPress={() => handleChipClick("Where are my nearby pharmacies?")}
         >
           <MaterialIcons name="local-pharmacy" size={24} color="#ef4444" style={styles.chipIcon} />
-          <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.text }]}>
+          <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>
             Find Pharmacy
           </Text>
         </TouchableOpacity>
@@ -192,7 +192,7 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
           onPress={() => handleChipClick("Remind me about my medicine")}
         >
           <MaterialIcons name="alarm" size={24} color="#3b82f6" style={styles.chipIcon} />
-          <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.text }]}>
+          <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>
             Medicine Times
           </Text>
         </TouchableOpacity>
@@ -202,7 +202,7 @@ export default function SeniorCompanionChat({ lastVoiceResult, onSendQuery }) {
           onPress={() => handleChipClick("Notify my family to call me")}
         >
           <MaterialIcons name="family-restroom" size={24} color="#10b981" style={styles.chipIcon} />
-          <Text style={[getResponsiveStyle(14), { fontWeight: '900', color: themeStyles.text }]}>
+          <Text style={[getResponsiveStyle(13), { fontWeight: '900', color: themeStyles.text, marginTop: 4 }]}>
             Message Family
           </Text>
         </TouchableOpacity>
@@ -217,17 +217,17 @@ const styles = StyleSheet.create({
   },
   chatArea: {
     flex: 1,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
   },
   chatScroll: {
-    paddingBottom: 20,
+    paddingBottom: 100,
   },
   messageBubble: {
     padding: 16,
     borderRadius: 24,
     marginVertical: 8,
     maxWidth: '85%',
-    borderWidth: 1,
+    borderWidth: 2,
   },
   aiBubble: {
     alignSelf: 'flex-start',
@@ -250,7 +250,7 @@ const styles = StyleSheet.create({
   },
   chip: {
     flex: 1,
-    height: 65, // enforcing minimum 60px target
+    height: 65,
     borderRadius: 20,
     borderWidth: 2,
     flexDirection: 'column',
@@ -266,6 +266,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 24,
     borderWidth: 2,
+    marginBottom: 16,
   },
   pharmacyHeader: {
     flexDirection: 'row',
@@ -278,7 +279,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 14,
     borderRadius: 16,
-    borderWidth: 1,
+    borderWidth: 2,
     marginVertical: 6,
   },
   pharmacyInfo: {
@@ -287,7 +288,7 @@ const styles = StyleSheet.create({
   },
   navigateBtn: {
     width: 100,
-    height: 60, // enforcing minimum 60px target
+    height: 60,
     borderRadius: 14,
     justifyContent: 'center',
     alignItems: 'center',
