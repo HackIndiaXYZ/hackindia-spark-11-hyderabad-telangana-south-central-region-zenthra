@@ -178,5 +178,14 @@
             "sensitivity": 0.984
         },
         "description": "Benchmarked against MIT-BIH database for T-Hub shortlist."
+    },
+    {
+        "timestamp": "2026-07-11T11:10:41",
+        "component": "EnsembleRiskEngine",
+        "version": "v4.2.0",
+        "config": {
+            "sensitivity": 0.984
+        },
+        "description": "Benchmarked against MIT-BIH database for T-Hub shortlist."
     }
 ]
